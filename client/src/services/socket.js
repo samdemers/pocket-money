@@ -11,7 +11,26 @@ class SocketService {
       return this.socket;
     }
 
-    const serverUrl = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    // Dynamic server URL detection for mobile testing
+    const getServerUrl = () => {
+      if (process.env.REACT_APP_API_URL) {
+        return process.env.REACT_APP_API_URL.replace('/api', '');
+      }
+      
+      // For mobile testing, use the current host
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      
+      // If accessing via IP address or network hostname, use that for Socket.IO
+      if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        return `${protocol}//${hostname}:5000`;
+      }
+      
+      // Default to localhost for development
+      return 'http://localhost:5000';
+    };
+
+    const serverUrl = getServerUrl();
     
     this.socket = io(serverUrl, {
       auth: {
