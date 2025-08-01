@@ -32,7 +32,7 @@ function Login() {
     // Clear errors when component mounts
     clearError();
     setLocalError('');
-  }, [clearError]);
+  }, []); // Remove clearError from dependencies to prevent infinite loop
 
   const handleChange = (e) => {
     setFormData({

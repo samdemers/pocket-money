@@ -53,7 +53,7 @@ function Dashboard() {
     return () => {
       socketService.removeAllListeners();
     };
-  }, []);
+  }, []); // Empty dependency array to run only once
 
   const loadDashboardData = async () => {
     try {

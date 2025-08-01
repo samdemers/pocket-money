@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   List,
@@ -63,7 +63,7 @@ function TransactionList({
       loadAccounts();
       loadCategories();
     }
-  }, [showFilters]);
+  }, [showFilters, loadTransactions, loadAccounts, loadCategories]);
 
   // Use prop transactions when not showing filters
   useEffect(() => {
@@ -72,7 +72,7 @@ function TransactionList({
     }
   }, [propTransactions, showFilters]);
 
-  const loadTransactions = async (page = 1) => {
+  const loadTransactions = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       
@@ -110,25 +110,25 @@ function TransactionList({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     try {
       const response = await accountsAPI.getAccounts();
       setAccounts(response.data.accounts);
     } catch (error) {
       console.error('Error loading accounts:', error);
     }
-  };
+  }, []);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const response = await transactionsAPI.getCategories();
       setCategories(response.data.categories);
     } catch (error) {
       console.error('Error loading categories:', error);
     }
-  };
+  }, []);
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({
@@ -208,7 +208,12 @@ function TransactionList({
                   label="Start Date"
                   value={filters.startDate}
                   onChange={(value) => handleFilterChange('startDate', value)}
-                  renderInput={(params) => <TextField {...params} fullWidth size="small" />}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: "small"
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
@@ -216,7 +221,12 @@ function TransactionList({
                   label="End Date"
                   value={filters.endDate}
                   onChange={(value) => handleFilterChange('endDate', value)}
-                  renderInput={(params) => <TextField {...params} fullWidth size="small" />}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: "small"
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={2}>

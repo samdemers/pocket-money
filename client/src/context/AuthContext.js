@@ -119,10 +119,12 @@ export function AuthProvider({ children }) {
         socketService.connect(token);
       } catch (error) {
         console.error('Error parsing stored user:', error);
-        logout();
+        // Don't call logout here as it causes circular dependency
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
     }
-  }, []);
+  }, []); // Empty dependency array
 
   // Login function
   const login = async (credentials) => {
