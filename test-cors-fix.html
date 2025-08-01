@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - Tink Banking App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 CORS Fix Verification</h1>
+    <p>This page tests if the CORS issue has been resolved.</p>
+    
+    <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+    <button onclick="testSignupEndpoint()">Test Signup Endpoint</button>
+    <button onclick="testClearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        function addResult(message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        function testClearResults() {
+            resultsDiv.innerHTML = '';
+        }
+        
+        async function testHealthEndpoint() {
+            addResult('Testing health endpoint...', 'loading');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Health endpoint SUCCESS: ${data.status}`, 'success');
+                } else {
+                    addResult(`❌ Health endpoint failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Health endpoint error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testSignupEndpoint() {
+            addResult('Testing signup endpoint...', 'loading');
+            
+            const testUser = {
+                email: `test${Date.now()}@corstest.com`,
+                password: 'password123',
+                firstName: 'CORS',
+                lastName: 'Test'
+            };
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testUser)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ Signup SUCCESS: User created with email ${data.user.email}`, 'success');
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    addResult(`❌ Signup failed: ${errorData.error || response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ Signup error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            addResult('🚀 CORS Test Page Loaded', 'loading');
+            setTimeout(testHealthEndpoint, 500);
+        });
+    </script>
+</body>
+</html>
